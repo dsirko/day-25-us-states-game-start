@@ -14,3 +14,7 @@ class SignState(Turtle):
 
     def write_state(self):
         self.write(f"{self.name}", align=ALIGNMENT, font=FONT)
+
+    def reset(self):
+        self.clear()
+        self.write_state()

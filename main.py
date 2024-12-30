@@ -1,5 +1,6 @@
 import turtle
 import pandas as pd
+import os
 from SignState import SignState
 
 
@@ -9,30 +10,44 @@ image = "blank_states_img.gif"
 screen.addshape(image)
 turtle.shape(image)
 
+
 df = pd.read_csv("50_states.csv")
-dict_from_csv = df.to_dict(orient="records")
-list_states_from_csv = df.state.to_list()
+all_states_from_csv_list = df.state.to_list()
 
-print(list_states_from_csv)
 
+def load_states():
+    all_states_from_csv_list = df.state.to_list()
+    print(all_states_from_csv_list, len(all_states_from_csv_list))
+
+
+load_states()
 guessed_states = []
 
 while len(guessed_states) < 50:
-
-    answer_state = turtle.textinput(title=f"{len(guessed_states)}/{len(dict_from_csv)} States Correct", prompt="What's another state's name?").title()
+    answer_state = turtle.textinput(title=f"{len(guessed_states)}/{len(all_states_from_csv_list)} States Correct", prompt="What's another state's name?").title()
 
     if answer_state == "Exit":
         break
 
-    # for st in dict_from_csv:
-    #     if answer_state in st["state"] and answer_state not in guessed_states:
-    #         print(f"it is finded {answer_state}\n"
-    #               f"cordinates: x:{st["x"]}, y:{st["y"]}")
-    #         state_to_show = SignState(answer_state, st["x"], st["y"])
-    #         state_to_show.write_state()
-    #         guessed_states.append(answer_state)
+    if answer_state == "Load":
+        try:
+            dfs = pd.read_csv("states_to_learn.csv")
+            print(dfs, "\n loaded")
+            all_states_from_csv_list = dfs.state.to_list()
+        except FileNotFoundError:
+            print("states_to_learn.csv not found")
+            load_states()
+            print("states_to_learn.csv reloaded")
+            all_states_from_csv_list = df.state.to_list()
 
-    for st in list_states_from_csv:
+    if answer_state == "Clear":
+        os.remove("states_to_learn.csv")
+        print("states_to_learn.csv deleted")
+        screen.reset()
+
+
+
+    for st in all_states_from_csv_list:
         if answer_state == st and answer_state not in guessed_states:
             state_data = df[df.state == answer_state]
             state_to_show = SignState(answer_state, state_data.x.item(), state_data.y.item())
@@ -40,34 +55,19 @@ while len(guessed_states) < 50:
             state_to_show.write_state()
             guessed_states.append(answer_state)
 
-        # elif answer_state != st["state"]:
-        #     print(f"{answer_state} didn't find!")
-        # print(st["state"], st["x"], st["y"])
 
-#     print(answer_state)
-
-for state in list_states_from_csv:
+for state in all_states_from_csv_list:
     for guessed_state in guessed_states:
         if state == guessed_state:
-            list_states_from_csv.remove(state)
+            all_states_from_csv_list.remove(state)
 
-with open("states_to_learn.csv", "w") as file:
-    for state in list_states_from_csv:
-        file.write(f"{state}\n")
+# create a pandas DataFrame from the list
+df = pd.DataFrame(all_states_from_csv_list, columns=['state'])
+# save the DataFrame to a CSV file
+df.to_csv('states_to_learn.csv', index=False)
 
-print(list_states_from_csv, len(list_states_from_csv))
-
-
-    # states_to_learn =
-
-# def get_mouse_click_coor(x, y):
-#     print(x, y)
-#
-# turtle.onscreenclick(get_mouse_click_coor)
+print(all_states_from_csv_list, len(all_states_from_csv_list))
 
 
-
-
-# screen.mainloop()
 
 
